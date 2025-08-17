@@ -2,7 +2,6 @@ package com.nampt.cantuninstall
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -12,6 +11,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -20,7 +23,7 @@ import androidx.work.WorkManager
 import com.nampt.cantuninstall.ui.theme.CantUninstallTheme
 
 class MainActivity : ComponentActivity() {
-    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -36,19 +39,18 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+fun getText(context: Context): String = if (isWorkerRunning(context)) "⏸" else "▶"
 
 @Composable
 fun Greeting(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    var text by remember { mutableStateOf(getText(context)) }
     Button(
-        onClick = { Log.d("CantUninstall", "Button clicked!") },
-        modifier = modifier
+        onClick = {
+            text = getText(context)
+        }, modifier = modifier
     ) {
-        val working=isWorkerRunning(LocalContext.current)
-        if (working) {
-            Text(text = "⏸")
-        } else {
-            Text(text = "▶")
-        }
+        Text(text)
     }
 }
 
@@ -60,8 +62,6 @@ fun GreetingPreview() {
         Greeting()
     }
 }
-
-
 
 fun isWorkerRunning(context: Context): Boolean {
     val workManager = WorkManager.getInstance(context)
